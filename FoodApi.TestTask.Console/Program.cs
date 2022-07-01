@@ -21,6 +21,8 @@ try
 		{
 			Console.WriteLine($"\"{item.RecallInitiationDate}\": \"{JsonConvert.SerializeObject(item)}\"");
 		}
+		
+		Console.WriteLine($"Mostly repeated word is: \"{fewestRecallDateResult.RepeatedWord.Word}\" , times : \"{fewestRecallDateResult.RepeatedWord.Occurences}\"");
 	}
 	else
 	{

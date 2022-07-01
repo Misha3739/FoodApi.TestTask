@@ -56,6 +56,28 @@ public class FoodRestApiExecutor
 		{
 			var result = recallDates.MinBy(d => d.Value.Recalls.Count).Value;
 			result.Recalls = result.Recalls.OrderBy(r => r.RecallInitiationDate).ToList();
+
+			Dictionary<string, int> repeatedWords = new Dictionary<string, int>();
+			foreach (var item in result.Recalls.Where(r => !string.IsNullOrEmpty(r.reason_for_recall)))
+			{
+				var words = item.reason_for_recall.Split(" ");
+				foreach (var word in words.Where(w => w.Length >= 4))
+				{
+					if (!repeatedWords.ContainsKey(word))
+					{
+						repeatedWords.Add(word, 1);
+					}
+					else
+					{
+						repeatedWords[word]++;
+					}
+				}
+			}
+
+			var repeatedWord = repeatedWords.MaxBy(w => w.Value);
+
+			result.RepeatedWord.Word = repeatedWord.Key;
+			result.RepeatedWord.Occurences = repeatedWord.Value;
 			return result;
 		}
 
