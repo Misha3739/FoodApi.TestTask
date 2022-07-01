@@ -9,13 +9,15 @@ public class FoodRestApiExecutor
 {
 	private readonly IRestExecutor _restExecutor;
 	private readonly IRecallDateStorage _recallDateStorage;
+	private readonly IWordOccurrencesHelper occurrencesHelper;
 	private readonly string _baseUrl;
 
-	public FoodRestApiExecutor(IRestExecutor restExecutor, string baseUrl, IRecallDateStorage recallDateStorage)
+	public FoodRestApiExecutor(IRestExecutor restExecutor, string baseUrl, IRecallDateStorage recallDateStorage, IWordOccurrencesHelper occurrencesHelper)
 	{
 		_restExecutor = restExecutor;
 		_baseUrl = baseUrl;
 		_recallDateStorage = recallDateStorage;
+		this.occurrencesHelper = occurrencesHelper;
 	}
 
 	public async Task<RecallDateResultModel?> FindReportDateWithFewestRecallAsync(DateTime fromUtc, DateTime toUtc)
@@ -48,27 +50,10 @@ public class FoodRestApiExecutor
 				var result = _recallDateStorage.Storage.MinBy(d => d.Value.Recalls.Count).Value;
 				result.Recalls = result.Recalls.OrderBy(r => r.RecallInitiationDate).ToList();
 
-				Dictionary<string, int> repeatedWords = new Dictionary<string, int>();
-				foreach (var item in result.Recalls.Where(r => !string.IsNullOrEmpty(r.reason_for_recall)))
-				{
-					var words = item.reason_for_recall.Split(" ");
-					foreach (var word in words.Where(w => w.Length >= 4))
-					{
-						if (!repeatedWords.ContainsKey(word))
-						{
-							repeatedWords.Add(word, 1);
-						}
-						else
-						{
-							repeatedWords[word]++;
-						}
-					}
-				}
+				var repeatedWord = occurrencesHelper.FindMaxOccurrences(result);
 
-				var repeatedWord = repeatedWords.MaxBy(w => w.Value);
-
-				result.RepeatedWord.Word = repeatedWord.Key;
-				result.RepeatedWord.Occurences = repeatedWord.Value;
+				result.RepeatedWord.Word = repeatedWord.word;
+				result.RepeatedWord.Occurences = repeatedWord.occurences;
 				return result;
 			}
 

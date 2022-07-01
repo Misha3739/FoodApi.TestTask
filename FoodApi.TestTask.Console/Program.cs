@@ -12,7 +12,8 @@ try
 	var baseUrl = "https://api.fda.gov/food/enforcement.json";
 	var restExecutor = new RestExecutor();
 	var storage = new RecallDateStorage();
-	var executor = new FoodRestApiExecutor(restExecutor, baseUrl, storage);
+	var wordOccurrencesHelper = new WordOccurrencesHelper();
+	var executor = new FoodRestApiExecutor(restExecutor, baseUrl, storage, wordOccurrencesHelper);
 	var dateTimeFromUtc = new DateTime(2012, 1, 1);
 	var dateTimeToUtc = new DateTime(2012, 12, 31);
 	var fewestRecallDateResult = await executor.FindReportDateWithFewestRecallAsync(dateTimeFromUtc,dateTimeToUtc);
