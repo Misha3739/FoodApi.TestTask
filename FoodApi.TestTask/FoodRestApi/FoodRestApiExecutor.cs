@@ -20,15 +20,39 @@ public class FoodRestApiExecutor
 
 	public async Task<DateTime?> FindReportDateWithFewestRecallAsync(DateTime fromUtc, DateTime toUtc)
 	{
-		var queryString =
-			$"{_baseUrl}?search=report_date:[{fromUtc.DateToQueryString()}+TO+{toUtc.DateToQueryString()}]&limit=1";
-		var data = await _restExecutor.GetAsync<FoodApiQueryRequestBody>(queryString);
-		if (data?.results != null && data.results.Count > 0)
+		var size = 1000;
+		long counter = 0;
+		long? total = null;
+		Dictionary<DateTime, int> recallDates = new Dictionary<DateTime, int>();
+		do
 		{
-			var reportDateStr = data.results[0].report_date;
-			return reportDateStr.ResponseStringToDate();
-		}
+			var queryString =
+				$"{_baseUrl}?search=report_date:[{fromUtc.DateToQueryString()}+TO+{toUtc.DateToQueryString()}]&limit={size}&skip={counter}";
+			var data = await _restExecutor.GetAsync<FoodApiQueryRequestBody>(queryString);
+			total = data.meta.results.total;
+			foreach (var result in data.results)
+			{
+				var reportDate = result.report_date.ResponseStringToDate();
+				if (reportDate.HasValue)
+				{
+					if (!recallDates.ContainsKey(reportDate.Value))
+					{
+						recallDates.Add(reportDate.Value, 1);
+					}
+					else
+					{
+						recallDates[reportDate.Value]++;
+					}
+				}
+			}
+			
+			counter += data!.meta.results.total;
+		} while (counter < total.Value);
 
+		if (recallDates.Any())
+		{
+			return recallDates.OrderBy(d => d.Value).First().Key;
+		}
 
 		return null;
 	}

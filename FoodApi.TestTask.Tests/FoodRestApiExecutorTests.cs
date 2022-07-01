@@ -28,16 +28,19 @@ public class FoodRestApiExecutorTests
 		var fileContent = await File.ReadAllTextAsync(path);
 		var response = JsonConvert.DeserializeObject<FoodApiQueryRequestBody>(fileContent);
 
+		var dateTimeFrom = new DateTime(2012, 1, 1);
+		var dateTimeTo = new DateTime(2012, 12, 31);
+		
 		_restExecutorMock.Setup(e => e.GetAsync<FoodApiQueryRequestBody>(It.IsAny<string>()))
 			.ReturnsAsync(response);
 
-		var dateTimeFrom = new DateTime(2012, 1, 1);
-		var dateTimeTo = new DateTime(2012, 12, 31);
+		
 		var actual = await _executor.FindReportDateWithFewestRecallAsync(dateTimeFrom, dateTimeTo);
-
-		string expectedUrl = $"{_baseUrl}?search=report_date:[20120101+TO+20121231]&limit=1";
-		_restExecutorMock.Verify(e => e.GetAsync<FoodApiQueryRequestBody>(expectedUrl), Times.Exactly(1));
-
+		
+		string expectedUrl1 = $"{_baseUrl}?search=report_date:[20120101+TO+20121231]&limit=1000&skip=0";
+		_restExecutorMock.Verify(e => e.GetAsync<FoodApiQueryRequestBody>(expectedUrl1), Times.Exactly(1));
+		_restExecutorMock.Verify(e => e.GetAsync<FoodApiQueryRequestBody>(It.IsAny<string>()), Times.Exactly(1));
+		
 		Assert.IsNotNull(actual);
 		var expectedDate = new DateTime(2012,8,15);
 		Assert.AreEqual(expectedDate, actual);
