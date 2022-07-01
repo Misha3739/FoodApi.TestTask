@@ -2,6 +2,7 @@
 using FoodApi.TestTask.Core;
 using FoodApi.TestTask.Domain;
 using FoodApi.TestTask.FoodRestApi;
+using FoodApi.TestTask.Helpers;
 using Moq;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -18,7 +19,8 @@ public class FoodRestApiExecutorTests
 	public FoodRestApiExecutorTests()
 	{
 		_restExecutorMock = new Mock<IRestExecutor>();
-		_executor = new FoodRestApiExecutor(_restExecutorMock.Object,_baseUrl);
+		var storage = new RecallDateStorage();
+		_executor = new FoodRestApiExecutor(_restExecutorMock.Object,_baseUrl, storage);
 	}
 	
 	[Test]

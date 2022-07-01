@@ -8,79 +8,75 @@ namespace FoodApi.TestTask.FoodRestApi;
 public class FoodRestApiExecutor
 {
 	private readonly IRestExecutor _restExecutor;
+	private readonly IRecallDateStorage _recallDateStorage;
 	private readonly string _baseUrl;
 
-	public FoodRestApiExecutor(IRestExecutor restExecutor, string baseUrl)
+	public FoodRestApiExecutor(IRestExecutor restExecutor, string baseUrl, IRecallDateStorage recallDateStorage)
 	{
 		_restExecutor = restExecutor;
 		_baseUrl = baseUrl;
+		_recallDateStorage = recallDateStorage;
 	}
 
 	public async Task<RecallDateResultModel?> FindReportDateWithFewestRecallAsync(DateTime fromUtc, DateTime toUtc)
 	{
-		var size = 1000;
-		long counter = 0;
-		long? total = null;
-		Dictionary<DateTime, RecallDateResultModel> recallDates = new Dictionary<DateTime, RecallDateResultModel>();
-		do
+		try
 		{
-			var queryString =
-				$"{_baseUrl}?search=report_date:[{fromUtc.DateToQueryString()}+TO+{toUtc.DateToQueryString()}]&limit={size}&skip={counter}";
-			var data = await _restExecutor.GetAsync<FoodApiQueryRequestBody>(queryString);
-			total = data.meta.results.total;
-			foreach (var result in data.results)
+			var size = 1000;
+			long counter = 0;
+			long? total = null;
+			do
 			{
-				var reportDate = result.report_date.ResponseStringToDate();
-				if (reportDate.HasValue)
+				var queryString =
+					$"{_baseUrl}?search=report_date:[{fromUtc.DateToQueryString()}+TO+{toUtc.DateToQueryString()}]&limit={size}&skip={counter}";
+				var data = await _restExecutor.GetAsync<FoodApiQueryRequestBody>(queryString);
+				total = data.meta.results.total;
+				foreach (var result in data.results)
 				{
-					if (!recallDates.ContainsKey(reportDate.Value))
+					var reportDate = result.report_date.ResponseStringToDate();
+					if (reportDate.HasValue)
 					{
-						var item = new RecallDateResultModel()
+						_recallDateStorage.AddOrUpdateItem(reportDate.Value, result);
+					}
+				}
+
+				counter += data!.meta.results.total;
+			} while (counter < total.Value);
+
+			if (_recallDateStorage.Storage.Any())
+			{
+				var result = _recallDateStorage.Storage.MinBy(d => d.Value.Recalls.Count).Value;
+				result.Recalls = result.Recalls.OrderBy(r => r.RecallInitiationDate).ToList();
+
+				Dictionary<string, int> repeatedWords = new Dictionary<string, int>();
+				foreach (var item in result.Recalls.Where(r => !string.IsNullOrEmpty(r.reason_for_recall)))
+				{
+					var words = item.reason_for_recall.Split(" ");
+					foreach (var word in words.Where(w => w.Length >= 4))
+					{
+						if (!repeatedWords.ContainsKey(word))
 						{
-							ReportDate = reportDate.Value,
-							Recalls = new List<FoodApiQueryRequestResult>() { result }
-						};
-						recallDates.Add(reportDate.Value, item);
-					}
-					else
-					{
-						recallDates[reportDate.Value].Recalls.Add(result);
+							repeatedWords.Add(word, 1);
+						}
+						else
+						{
+							repeatedWords[word]++;
+						}
 					}
 				}
-			}
-			
-			counter += data!.meta.results.total;
-		} while (counter < total.Value);
 
-		if (recallDates.Any())
-		{
-			var result = recallDates.MinBy(d => d.Value.Recalls.Count).Value;
-			result.Recalls = result.Recalls.OrderBy(r => r.RecallInitiationDate).ToList();
+				var repeatedWord = repeatedWords.MaxBy(w => w.Value);
 
-			Dictionary<string, int> repeatedWords = new Dictionary<string, int>();
-			foreach (var item in result.Recalls.Where(r => !string.IsNullOrEmpty(r.reason_for_recall)))
-			{
-				var words = item.reason_for_recall.Split(" ");
-				foreach (var word in words.Where(w => w.Length >= 4))
-				{
-					if (!repeatedWords.ContainsKey(word))
-					{
-						repeatedWords.Add(word, 1);
-					}
-					else
-					{
-						repeatedWords[word]++;
-					}
-				}
+				result.RepeatedWord.Word = repeatedWord.Key;
+				result.RepeatedWord.Occurences = repeatedWord.Value;
+				return result;
 			}
 
-			var repeatedWord = repeatedWords.MaxBy(w => w.Value);
-
-			result.RepeatedWord.Word = repeatedWord.Key;
-			result.RepeatedWord.Occurences = repeatedWord.Value;
-			return result;
+			return null;
 		}
-
-		return null;
+		finally
+		{
+			_recallDateStorage.CleanUp();
+		}
 	}
 }

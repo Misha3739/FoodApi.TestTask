@@ -2,6 +2,7 @@
 
 using FoodApi.TestTask.Core;
 using FoodApi.TestTask.FoodRestApi;
+using FoodApi.TestTask.Helpers;
 using Newtonsoft.Json;
 
 Console.WriteLine("Food api test task");
@@ -10,7 +11,8 @@ try
 {
 	var baseUrl = "https://api.fda.gov/food/enforcement.json";
 	var restExecutor = new RestExecutor();
-	var executor = new FoodRestApiExecutor(restExecutor, baseUrl);
+	var storage = new RecallDateStorage();
+	var executor = new FoodRestApiExecutor(restExecutor, baseUrl, storage);
 	var dateTimeFromUtc = new DateTime(2012, 1, 1);
 	var dateTimeToUtc = new DateTime(2012, 12, 31);
 	var fewestRecallDateResult = await executor.FindReportDateWithFewestRecallAsync(dateTimeFromUtc,dateTimeToUtc);
