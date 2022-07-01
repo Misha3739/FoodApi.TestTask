@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodApi.TestTask", "FoodApi.TestTask\FoodApi.TestTask.csproj", "{04964A41-EA8B-41A0-8071-F45263A633C7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodApi.TestTask.Tests", "FoodApi.TestTask.Tests\FoodApi.TestTask.Tests.csproj", "{7C66E606-9E1F-4948-A3F3-546C4DAD4743}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodApi.TestTask.Console", "FoodApi.TestTask.Console\FoodApi.TestTask.Console.csproj", "{8634F5EA-E73F-4DFE-B830-F7387146F6C0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{04964A41-EA8B-41A0-8071-F45263A633C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04964A41-EA8B-41A0-8071-F45263A633C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04964A41-EA8B-41A0-8071-F45263A633C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04964A41-EA8B-41A0-8071-F45263A633C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C66E606-9E1F-4948-A3F3-546C4DAD4743}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C66E606-9E1F-4948-A3F3-546C4DAD4743}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C66E606-9E1F-4948-A3F3-546C4DAD4743}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C66E606-9E1F-4948-A3F3-546C4DAD4743}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8634F5EA-E73F-4DFE-B830-F7387146F6C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8634F5EA-E73F-4DFE-B830-F7387146F6C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8634F5EA-E73F-4DFE-B830-F7387146F6C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8634F5EA-E73F-4DFE-B830-F7387146F6C0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
