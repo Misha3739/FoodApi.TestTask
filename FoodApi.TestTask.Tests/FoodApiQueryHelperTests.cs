@@ -39,5 +39,6 @@ public class FoodApiQueryHelperTests
 	{
 		yield return new TestCaseData("20120101", new DateTime(2012, 1, 1));
 		yield return new TestCaseData("20121231", new DateTime(2012, 12, 31));
+		yield return new TestCaseData("20120709", new DateTime(2012, 7, 9));
 	}
 }

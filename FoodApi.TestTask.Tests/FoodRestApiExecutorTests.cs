@@ -43,6 +43,6 @@ public class FoodRestApiExecutorTests
 		
 		Assert.IsNotNull(actual);
 		var expectedDate = new DateTime(2012,8,15);
-		Assert.AreEqual(expectedDate, actual);
+		Assert.AreEqual(expectedDate, actual.ReportDate);
 	}
 }

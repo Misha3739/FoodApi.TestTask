@@ -1,9 +1,7 @@
-﻿using System.Net.Http.Json;
-using FoodApi.TestTask.Core;
+﻿using FoodApi.TestTask.Core;
 using FoodApi.TestTask.Domain;
 using FoodApi.TestTask.Helpers;
-using Newtonsoft.Json;
-using RestSharp;
+using FoodApi.TestTask.Models;
 
 namespace FoodApi.TestTask.FoodRestApi;
 
@@ -18,12 +16,12 @@ public class FoodRestApiExecutor
 		_baseUrl = baseUrl;
 	}
 
-	public async Task<DateTime?> FindReportDateWithFewestRecallAsync(DateTime fromUtc, DateTime toUtc)
+	public async Task<RecallDateResultModel?> FindReportDateWithFewestRecallAsync(DateTime fromUtc, DateTime toUtc)
 	{
 		var size = 1000;
 		long counter = 0;
 		long? total = null;
-		Dictionary<DateTime, int> recallDates = new Dictionary<DateTime, int>();
+		Dictionary<DateTime, RecallDateResultModel> recallDates = new Dictionary<DateTime, RecallDateResultModel>();
 		do
 		{
 			var queryString =
@@ -37,11 +35,16 @@ public class FoodRestApiExecutor
 				{
 					if (!recallDates.ContainsKey(reportDate.Value))
 					{
-						recallDates.Add(reportDate.Value, 1);
+						var item = new RecallDateResultModel()
+						{
+							ReportDate = reportDate.Value,
+							Recalls = new List<FoodApiQueryRequestResult>() { result }
+						};
+						recallDates.Add(reportDate.Value, item);
 					}
 					else
 					{
-						recallDates[reportDate.Value]++;
+						recallDates[reportDate.Value].Recalls.Add(result);
 					}
 				}
 			}
@@ -51,7 +54,9 @@ public class FoodRestApiExecutor
 
 		if (recallDates.Any())
 		{
-			return recallDates.OrderBy(d => d.Value).First().Key;
+			var result = recallDates.MinBy(d => d.Value.Recalls.Count).Value;
+			result.Recalls = result.Recalls.OrderBy(r => r.RecallInitiationDate).ToList();
+			return result;
 		}
 
 		return null;

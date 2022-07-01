@@ -1,4 +1,6 @@
-﻿namespace FoodApi.TestTask.Domain;
+﻿using FoodApi.TestTask.Helpers;
+
+namespace FoodApi.TestTask.Domain;
 
 public class FoodApiQueryRequestResult
 {
@@ -29,4 +31,7 @@ public class FoodApiQueryRequestResult
 	public int skip { get; set; }
 	public int limit { get; set; }
 	public int total { get; set; }
+
+	public DateTime? ReportDate => report_date.ResponseStringToDate();
+	public DateTime? RecallInitiationDate => recall_initiation_date.ResponseStringToDate();
 }
